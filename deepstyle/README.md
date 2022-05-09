@@ -15,7 +15,7 @@ TQDM        -- 4.54.1
 ## Usage Steps
 
 1. Please download intput/ target image [here](https://drive.google.com/file/d/1uifU7Fe_AQKcQyMKeENyXGhNu5Z0lfpq/view?usp=sharing) and unzip it into `DIP\_final/deepstyle/img-target`. 
-   Please download style image [here](https://drive.google.com/file/d/1uifU7Fe_AQKcQyMKeENyXGhNu5Z0lfpq/view?usp=sharing) and unzip it into `DIP\_final/deepstyle/img-style and unzip it into `DIP\_final/deepstyle/img-style`.
+   Please download style image [here](https://drive.google.com/file/d/10DYK0jWspHgsWq2PM-3paJo5YBE8VTbC/view?usp=sharing) and unzip it into `DIP\_final/deepstyle/img-style and unzip it into `DIP\_final/deepstyle/img-style`.
 2. Use shell scripts `run-all.sh` (for all target images).
 3. Move the results of **traditional algorithm** to  `img-style`. e.g. `cp -r ../traditional/output/video\_v1\_8\_1\_3\_0\_0\_1\_0.5\_1/ img-style/v1`
    Then `run-all-video.sh` (for all videos) to conduct all experiments.
