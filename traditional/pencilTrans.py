@@ -170,11 +170,11 @@ def gen_tone_map(img, grp):
 
 def pencilTrans(im_path, ks, swidth, dirNum, sks, gammaS, gammaI, grp, pencil_type, is_rgb):
     if is_rgb:
-        img = cv2.imread(im_path, 1)
+        img = cv2.imread("{0}.jpg".format(im_path), 1)
         img_yuv = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
         img_lum = img_yuv[:, :, 0]
     else:
-        img = cv2.imread(im_path, 0)
+        img = cv2.imread("{0}.jpg".format(im_path), 0)
         img_lum = img.copy()
     #cv2.imshow('0', img)
 
@@ -183,12 +183,16 @@ def pencilTrans(im_path, ks, swidth, dirNum, sks, gammaS, gammaI, grp, pencil_ty
 
     S = gen_stroke(img_lum, ks, swidth, dirNum, sks)
     S = S**gammaS
+    S_tmp = np.clip(S*255, 0, 255).astype(np.uint8)
+    cv2.imwrite("{0}-S.jpg".format(im_path), S_tmp)
     #cv2.imshow('1', (S*255).astype('uint8'))
 
     ## Generate the tone map
     J = gen_tone_map(img_lum, grp)
     J = J**gammaI
     #cv2.imshow('2', (J*255).astype('uint8'))
+    J_tmp = np.clip(J*255, 0, 255).astype(np.uint8)
+    cv2.imwrite("{0}-J.jpg".format(im_path), J_tmp)
 
     ## Read the pencil texture
     P = cv2.imread('pencils/pencil%d.jpg'%pencil_type, 0)
@@ -197,6 +201,8 @@ def pencilTrans(im_path, ks, swidth, dirNum, sks, gammaS, gammaI, grp, pencil_ty
     ## Generate the pencil map
     T = gen_pencil(img_lum, P, J)
     #cv2.imshow('3', (T*255).astype('uint8'))
+    T_tmp = np.clip(T*255, 0, 255).astype(np.uint8)
+    cv2.imwrite("{0}-T.jpg".format(im_path), T_tmp)
 
     ## Compute the result
     img_lum = S*T
@@ -218,9 +224,6 @@ def parse_args():
 
     parser.add_argument('--input_path', dest='input_path',
                       help='the file path of the original image)',
-                      required=True, type=str)
-    parser.add_argument('--save_path', dest='save_path',
-                      help='the path for saving result)',
                       required=True, type=str)
     parser.add_argument('-ks', dest='ks',
                       help='size of the line segement kernel (usually 1/30 of the height/width of the original image)',
@@ -256,6 +259,6 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
     im = pencilTrans(args.input_path, args.ks, args.sw, args.nd, args.sks, args.sd, args.td, args.wg, args.pt, args.rgb)
-    cv2.imwrite(args.save_path, im)
+    cv2.imwrite("{0}-s0.jpg".format(args.input_path), im)
     #cv2.imshow('5', im)
     #cv2.waitKey(0)
