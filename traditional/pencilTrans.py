@@ -193,6 +193,9 @@ def pencilTrans(im_path, ks, swidth, dirNum, sks, gammaS, gammaI, grp, pencil_ty
     #cv2.imshow('2', (J*255).astype('uint8'))
     J_tmp = np.clip(J*255, 0, 255).astype(np.uint8)
     cv2.imwrite("{0}-J.jpg".format(im_path), J_tmp)
+    # mask for DeepNormal
+    J_rev_tmp = 255 - J_tmp
+    cv2.imwrite("{0}-mask.jpg".format(im_path), J_rev_tmp)
 
     ## Read the pencil texture
     P = cv2.imread('pencils/pencil%d.jpg'%pencil_type, 0)
