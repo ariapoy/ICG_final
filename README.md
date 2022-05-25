@@ -24,7 +24,9 @@ cd deepstyle/
 python main.py --style img-style/s1.jpg --content teapot3.png --out-dir teapot3 --out_name teapot3-s1 --alpha 0.1
 # 3 DeepNormal
 cd DeepNormal/DeepNormals/
-python main.py --lineart_path teapot3-S.jpg --mask_path teapot-S.jpg --save_name teapot-S
+python main.py --lineart_path teapot3-S.jpg --mask_path teapot3-S.jpg --save_name teapot3-S
+# 4 DeepNormal
+python ICG_Rendering.py --lineart_path teapot3-S.jpg --mask_path teapot3-S.jpg --normal_path teapot3- --color_path harold.jpg
 ```
 
 ## Quick Start
