@@ -85,7 +85,7 @@ parser.add_argument('--color_path', dest='color_path', default='Pepper/Colors.jp
 parser.add_argument('--r', dest='r', type= float, default=0.99, help='r value for light')
 parser.add_argument('--g', dest='g', type= float, default=0.83, help='r value for light')
 parser.add_argument('--b', dest='b', type= float, default=0.66, help='r value for light')
-parser.add_argument('--save_path', dest ='save_path', default='RES/', help='Path of the save folder')
+parser.add_argument('--save_path', dest ='save_path', default='test/', help='Path of the save folder')
 args = parser.parse_args()
 
 # Add docker prefix if needed
@@ -142,7 +142,10 @@ Plight = 0.8
 #print(ind)
 loop = False
 t = 0
-# while loop:
+
+from pathlib import Path
+Path(args.save_path).mkdir(parents=True, exist_ok=True)
+
 while t <= 9:
 
 	if(filtering >0):
@@ -188,7 +191,7 @@ while t <= 9:
 	color64[np.where(Mask == 0)]= 255
 	final = color64.astype(np.dtype('uint8'))
 	# cv2.imshow('final', final)
-	cv2.imwrite('test{0}.png'.format(t), final)
+	cv2.imwrite('{1}/{0}.png'.format(t, args.save_path), final)
 	t += 1
 
 	pos_diff = 100 * 8

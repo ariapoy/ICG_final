@@ -22,34 +22,70 @@ def center_crop_square(im, size):
 
 
 #def image_loader(image_name, imsize, device):
-def image_loader(image_name, device, toGray=False):
+# def image_loader(image_name, device, toGray=False):
+def image_loader(image_name):
     #loader = transforms.Compose([transforms.CenterCrop( int(0.9*imsize) ),
     #                             transforms.Resize(imsize),
     #                             transforms.ToTensor()])
-    loader = transforms.Compose([transforms.ToTensor()])
+    # loader = transforms.Compose([transforms.ToTensor()])
 
     image = Image.open(image_name)
-    #image = center_crop_square(image, min(*image.size))
+    # #image = center_crop_square(image, min(*image.size))
+    # if toGray:
+    #     image = Image.fromarray( np.stack([np.array(image.convert("L"))]*3, 2) )
+
+    # # gen batch dimension required to fit network's input dimensions
+    # image = loader(image).unsqueeze(0)
+    # return image.to(device, torch.float)
+    image = image.convert("RGB")
+    return image
+
+def image_transform(image, device, toGray=False):
+    loader = transforms.Compose([transforms.ToTensor()])
     if toGray:
         image = Image.fromarray( np.stack([np.array(image.convert("L"))]*3, 2) )
 
     # gen batch dimension required to fit network's input dimensions
     image = loader(image).unsqueeze(0)
+
     return image.to(device, torch.float)
 
-
 def get_starting_imgs(args):
-    #style_img = image_loader(args.style, args.imsize, args.device)
-    style_img = image_loader(args.style, args.device, args.gray)
+    # if args.content is not None:
+    #     #content_img = image_loader(args.content, args.imsize, args.device)
+    #     content_img = image_loader(args.content, args.device, args.gray)
+    #     if args.histmatch:
+    #         content_img = hist_match(content_img.cpu().numpy(), style_img.cpu().numpy())
+    #         content_img = torch.from_numpy(content_img).to(args.device).float()
+    # else:
+    #     content_img = None
 
-    if args.content is not None:
-        #content_img = image_loader(args.content, args.imsize, args.device)
-        content_img = image_loader(args.content, args.device, args.gray)
-        if args.histmatch:
-            content_img = hist_match(content_img.cpu().numpy(), style_img.cpu().numpy())
-            content_img = torch.from_numpy(content_img).to(args.device).float()
-    else:
-        content_img = None
+    # style_img = image_loader(args.style, args.imsize, args.device)
+    # style_img = image_loader(args.style, args.device, args.gray)
+
+    # content_img = image_loader(args.content, args.device, args.gray)
+    content_img = image_loader(args.content)
+    # style_img = image_loader(args.style, args.device, args.gray)
+    style_img = image_loader(args.style)
+    
+    max_wxh = args.gpu_memory*22755
+    M, N = content_img.size
+    orig_M, orig_N = M, N
+    k = 1
+    while (M*N > max_wxh):
+        M = int(M/k)
+        N = int(N/k)
+        k += 1
+
+    content_img = content_img.resize((M, N))
+    style_img = style_img.resize((M, N))
+
+    content_img = image_transform(content_img, args.device, args.gray)
+    style_img = image_transform(style_img, args.device, args.gray)
+
+    if args.histmatch:
+        content_img = hist_match(content_img.cpu().numpy(), style_img.cpu().numpy())
+        content_img = torch.from_numpy(content_img).to(args.device).float()
 
     if args.init_img == 'content':
         assert args.content is not None
@@ -58,19 +94,24 @@ def get_starting_imgs(args):
     elif args.init_img == 'random':
         gen_img = torch.randn(style_img.data.size(), device=args.device)
         gen_img.data.clamp_(0, 1)
+    elif args.init_img == 'style':
+        gen_img = style_img.clone()
     else:
         gen_img = Image.open(args.init_img)
+        gen_img = gen_img.resize(style_img.size())
         gen_img = F.to_tensor(gen_img).unsqueeze(0).to(args.device)
 
     #print(gen_img.size())
-    return style_img, content_img, gen_img
+    return style_img, content_img, gen_img, (orig_M, orig_N)
 
 
-def save_tensor_img(out_img, outpath):
+def save_tensor_img(out_img, outpath, size=None):
     out_img = out_img.cpu().clone()
     # remove the gen batch dimension
     out_img = out_img.squeeze(0)
     out_img = transforms.ToPILImage()(out_img)
+    if size:
+        out_img = out_img.resize(size)
 
     out_img.save(outpath)
     return outpath

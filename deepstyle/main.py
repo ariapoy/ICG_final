@@ -32,12 +32,14 @@ parser.add_argument('--device', choices=['cuda', 'cpu'], default='cuda')
 # CNN
 parser.add_argument('--cnn', type=str, default='vgg19-bn',
                     choices=['vgg19-bn', 'vgg19-bn-relu', 'vgg19', 'vgg19-relu', 'resnet18', 'dense121'])
-parser.add_argument('--layers', type=int, default=None, help='number of layers to. should be within [0, 5]')
+parser.add_argument('--layers', type=int, default=5, help='number of layers to. should be within [0, 5]')
 parser.add_argument('--disc-hdim', type=int, default=256, help='dimension of the hidden layers in the discriminator')
 parser.add_argument('--random', dest='pretrained', action='store_false')
 
 # Images
-parser.add_argument('--init-img', type=str, default='random',
+parser.add_argument('--gpu_memory', type=int, default=8,
+                    help='gpu memory size we can use.')
+parser.add_argument('--init-img', type=str, default='content',
                     help='how to initialize the generated image. can be one of [random, content, <path to image>]')
 parser.add_argument('--style', type=str, help='path to style image')
 parser.add_argument('--content', type=str, default=None, help='optional path to content image')
@@ -60,7 +62,7 @@ import pdb
 
 def run(args):
     # Images
-    style_img, content_img, gen_img = utils.get_starting_imgs(args)
+    style_img, content_img, gen_img, orig_content_size = utils.get_starting_imgs(args)
 
     # CNN layers
     style_layers, content_layers = cnn.get_layers(args)
@@ -81,12 +83,17 @@ def run(args):
     style_name = style_name.split('.')[0]
     # gen_name = args.out_name
     gen_name = args.out_name.replace("img-style/", "")
+    # create out-dir
+    from pathlib import Path
+    Path(args.out_dir).mkdir(parents=True, exist_ok=True)
     # content img
     utils.save_tensor_img(content_img, os.path.join(args.out_dir, '{0}-{1}.png'.format(content_name, style_name)))
     # style img
     utils.save_tensor_img(style_img, os.path.join(args.out_dir, '{}.png'.format(style_name)))
     # Generated image
     utils.save_tensor_img(gen_img, os.path.join(args.out_dir, 'gen_{}.png'.format(gen_name)))
+    # Generated image resize
+    utils.save_tensor_img(gen_img, os.path.join(args.out_dir, '{}-s1.png'.format(gen_name)), orig_content_size)
     #gen_hist[0].save(os.path.join(args.out_dir, 'gen.gif'), save_all=True, append_images=gen_hist[1:])
     # Losses
     #loss_fig.savefig(os.path.join(args.out_dir, 'losses.png'))

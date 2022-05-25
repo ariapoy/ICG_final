@@ -170,13 +170,14 @@ def gen_tone_map(img, grp):
 
 def pencilTrans(im_path, ks, swidth, dirNum, sks, gammaS, gammaI, grp, pencil_type, is_rgb):
     if is_rgb:
-        img = cv2.imread("{0}.jpg".format(im_path), 1)
+        img = cv2.imread("{0}".format(im_path), 1)
         img_yuv = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
         img_lum = img_yuv[:, :, 0]
     else:
-        img = cv2.imread("{0}.jpg".format(im_path), 0)
+        img = cv2.imread("{0}".format(im_path), 0)
         img_lum = img.copy()
     #cv2.imshow('0', img)
+    im_path = im_path.split(".")[0]
 
     ## trans img into [0, 1]
     img_lum = img_lum.astype(float)/255.
@@ -195,7 +196,9 @@ def pencilTrans(im_path, ks, swidth, dirNum, sks, gammaS, gammaI, grp, pencil_ty
     cv2.imwrite("{0}-J.jpg".format(im_path), J_tmp)
     # mask for DeepNormal
     J_rev_tmp = 255 - J_tmp
-    cv2.imwrite("{0}-mask.jpg".format(im_path), J_rev_tmp)
+    # mask_threshold = 256 / 4
+    # J_rev_tmp = np.where(J_rev_tmp < mask_threshold, 0, J_rev_tmp)
+    cv2.imwrite("{0}-Jrev.jpg".format(im_path), J_rev_tmp)
 
     ## Read the pencil texture
     P = cv2.imread('pencils/pencil%d.jpg'%pencil_type, 0)
@@ -262,6 +265,7 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
     im = pencilTrans(args.input_path, args.ks, args.sw, args.nd, args.sks, args.sd, args.td, args.wg, args.pt, args.rgb)
-    cv2.imwrite("{0}-s0.jpg".format(args.input_path), im)
+    input_path = args.input_path.split(".")[0]
+    cv2.imwrite("{0}-s0.jpg".format(input_path), im)
     #cv2.imshow('5', im)
     #cv2.waitKey(0)
