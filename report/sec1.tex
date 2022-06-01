@@ -1,0 +1,29 @@
+\section{Motivation}
+When writing \textit{hw2}, we discover the \textbf{intermediates} of \textbf{edge detection}, such as \textbf{gradient}, \textbf{Laplacian} and \textbf{hysteretic thresholding} in \textbf{Canny method}, is similar to \textbf{human-like} sketch of image. And there are some visual effect when we use \textbf{transfer function} to change the intensity histogram distribution in \figref{fig1}.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{image/fig1.png}
+    \caption{Intermediates and results in \textit{hw2}}
+    \label{fig1}
+\end{figure}
+It is similar to \alert{pencil sketching/drawing}, which is everyone familiar with the art style. Our question is: `Can we transform the real-world image into the pencil sketch style picture?'
+
+Two primary components of image rendering are \textbf{outlines} and \textbf{shading} that reflect differences in the amount of light falling on a region with its intensity, tone, and texture. Furthermore, there are different techniques for pencil sketching art tips for beginners to create beautiful pictures.
+
+Take use the skills in \textit{digital image processing}, we could obtain \textbf{outlines} as \textbf{edge detection}; \textbf{shading} as part of \textbf{distorting} and \textbf{texture analysis}. If we build the great combination of these techniques, make the images as pencil sketching is possible.
+
+Besides, as the \textbf{deep learning style transfer}, or \textbf{deep style} \cite{CVPR2016_Gatys_stcnn}, is popular recently. It is intuitively connected to style transfer as the pencil sketching is the type among the art style. We could collect the classic paints from \href{https://www.vangoghgallery.com/catalog/catalog.html}{The VANGOGH GALLERY}, \href{https://www.pinterest.com/}{pinterest} and \href{https://images.google.com/}{Google image} as \textbf{style image}. Then transform the image as this specific style like \figref{fig2}.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{image/fig2.png}
+    \caption{Examples of \textbf{style transfer}}
+    \label{fig2}
+\end{figure}
+
+In summary, given the photo/images, we want to transform them into the \textbf{pencil sketch} style. And we’re going to compare the effects from traditional \textbf{image processing} with fancy \textbf{deep style} method \figref{fig1-1}.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{image/fig1-1.png}
+    \caption{Goal of this project}
+    \label{fig1-1}
+\end{figure}

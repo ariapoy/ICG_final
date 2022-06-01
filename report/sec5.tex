@@ -1,0 +1,20 @@
+\section{Conclusions}
+We compare traditional algorithm, deep style and Im2pencil.
+
+Basically, all of these methods can achieve the pencil sketching style.
+\begin{enumerate}
+  \item Traditional algorithm is relative stable on all scenarios. But it lacks of variation style and makes artificial results on video.
+  \item Deep style transfer generates diversity pencil sketching style. However, it spends a lot of time as we need to train every time. And it is difficult of choosing the suitable style images. Last, it could twink on the video.
+  \item Our combination method balance the results between traditional algorithm and deep style transfer. But we fail on video twinkling.
+  \item Im2pencil gives well performance on each scenarios. But we only use predefined model to predict our images. It is expensive to retrain the outline CNN as well as shading CNN when we need to collect a lot of desired style images.
+\end{enumerate}
+
+In summary, our accomplishment are
+\begin{itemize}
+  \item Implement several methods including traditional algorithm and deep style.
+  \item Improve deep style by WGAN discriminator.
+  \item Combine image processing and deep style.
+  \item Compare with SOTA on different tasks.
+\end{itemize}
+We leave the video twinkling as the future work. Maybe add continuous noise term into loss is one direction.
+The other is make it as open source service oh the GitHub\footnote{\href{https://github.com/yxliu-ntu/DIP_Final}{https://github.com/yxliu-ntu/DIP\_Final}}.

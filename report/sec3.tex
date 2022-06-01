@@ -1,0 +1,219 @@
+\section{Algorithm}
+In this project, we implement and compare three models:
+\begin{enumerate}
+  \item Traditional algorithm. \textbf{combine sketch and tone} \cite{2012_Lu_combine}.
+  \item Deep style algorithm. \textbf{deep style transfer} \cite{CVPR2016_Gatys_stcnn} and its improvement \cite{2020_Huang_sdf}.
+  \item SOTA deep learning algorithm. \textbf{Im2pencil} \cite{2019CVPR_Li_img2pencil}.
+\end{enumerate}
+The first one is the traditional image processing method. And the second and third methods are deep learning-based.
+
+In the following subsections, we discuss these methods core idea and critical properties affect our results.
+
+\subsection{Traditional algorithm}
+Based on the observation of people's pencil sketch images in daily life, we can divide the drawing process into two steps:
+\begin{enumerate}
+    \item To outline the shape of objects.
+    \item To render the picture, for example, penciling repeatedly and gently.
+\end{enumerate}
+According to the description above, we can design a framework as the combination of skills in traditional image processing \figref{fig5}.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{image/fig5.png}
+    \caption{Overview of traditional algorithm in \cite{2012_Lu_combine}}
+    \label{fig5}
+\end{figure}
+
+For \textbf{line drawing}, first, we need an effective tool to get the contour. The strategy here is to find the \textbf{gradient map} (\(G\)) of the original image (\(I\)).
+\[
+  G = \left( (\partial_{x}I)^{2} + (\partial_{y}I)^{2} \right)
+\]
+The second is a line drawing by \textbf{convolution}. Convolution aggregates \(G\) with nearby pixels in which are \(1\) along the specific directions and the other values are \(0\). Considering the anti-aliasing problem, the convolution kernel is obtained by bilinear interpolation.
+The size of the convolution kernel is
+proposed as \(\frac{1}{30}\) of the width or height of the original image. That is
+\[
+  G_{i} = L_{i} \circledast G, 
+\]
+where \(\circledast\) means convolution and \(L_{i}\) is the line segment at the \(i^{\mbox{th}}\) direction.
+After obtaining the convolution result of all directions, for each pixel point, the response of the corresponding direction with the maximum convolution value is set as
+\[
+C_{i}(p) = 
+\begin{cases}
+  G(p), & \mbox{ if } \arg \max_{i} \{G_{i}(p)\} = i\\
+  0, & \mbox{otherwise}
+\end{cases}
+\]
+In the end, we convolve the response map set \(\{C_{i}\}\) obtained above from the various directions again, it imitates human-like line-drawing process and resisting noise.
+\[
+S^{'}=\sum_{i=1}^{8} L_{i} \circledast C_{i}
+\]
+
+For \textbf{tone mapping}, according to the observation and analysis of a large number of hand-drawn pencil images, the distributions of their histogram are very different from photo images we took, but this paper finds three types of \textbf{transfer function} of description about pencil sketch.
+\begin{itemize}
+  \item Shadow as Gaussian distribution. \(p_{3}(v) = \frac{1}{\sqrt{2 \pi \sigma_{d}}}{\exp\left(-\frac{(v - \mu_{d})^{2}}{2 \sigma_{d}^{2}}\right)}\)
+  \item Mild-tone as uniform distribution. \(p_{2}(v) =
+  \begin{cases}
+  \frac{1}{u_{b}-u_{a}}, & \mbox{ if } u_{a} \leq v \leq u_{b}\\
+  0, & \mbox{otherwise}
+  \end{cases}\)
+  \item Highlight as exponential distribution.  \(p_{1}(v) =
+  \begin{cases}
+  \frac{1}{\sigma_{b}} \exp \left(-\frac{1 - v}{\sigma_{b}} \right), & \mbox{ if } v \leq 1\\
+  0, & \mbox{otherwise}
+  \end{cases}\)
+\end{itemize}
+where \(\mu_{d}\), \(\sigma_{d}\) are mean and standard deviation, \(u_{a}, u_{b}\) are range of intensity, and \(\sigma_{b}\) is mean. Then we combine them together by \[
+p(v) = \frac{1}{Z}\sum_{i=1}^{3} w_{i} p_{i}(v)
+\]
+where \(Z\) is normalisation term and \(w_{i}\) is weight of each transfer function.
+Empirically, we set the hyper-parameters above as \tabref{table:1}.
+\begin{table}[h!]
+\centering
+\begin{tabular}{c c c c c c c c} 
+ \hline
+ \(w_{1}\) & \(w_{2}\) & \(w_{3}\) & \(\sigma_{b}\) & \(u_{a}\) & \(u_{b}\) & \(\mu_{d}\) & \(\sigma_{d}\) \\ [0.5ex] 
+ \hline\hline
+ \(52\) & \(37\) & \(11\) & \(9\) & \(105\) & \(225\) & \(90\) & \(11\) \\ 
+ \hline
+\end{tabular}
+\caption{Hyper-parameters in traditional algorithm}
+\label{table:1}
+\end{table}
+And we apply \(p(v)\) on each pixels to get \(J(x)\).
+
+Second is pencil texture rendering, this paper collects \(20\) pencil textures \(H(x)\) and learns the \textbf{level of intensity} \(\beta^{\ast}\).
+\[
+\beta^{\ast} = \arg \min_{\beta} \|\beta \log H(x) - \log J(x) \|^{2}_{2} + \lambda \|\nabla \beta \|^{2}_{2}
+\]
+where \(\lambda=0.2\) is regularisation term.
+
+Finally, we can get the result image by element-wise multiply between \textbf{line drawing} \(S\) \& \textbf{tone mapping} \(T=H^{\beta^{\ast}}\).
+\[
+    R = T \ast S
+\]
+where \(\ast\) is element-wise product.
+
+\subsection{Deep style}
+In this project, we are going to implement \cite{CVPR2016_Gatys_stcnn}, which is the earliest and famous deep learning-based style transfer. The core idea of this paper uses a pre-trained \textbf{convolutional neural network (CNN)}, VGG-19 to extract and merge the \textbf{content representation} of one image with the \textbf{style representation} of another from different levels.
+
+Compare with traditional image processing method, \textbf{content} is defined as the semantic information of an image, i.e. the \textbf{line drawing}. While \textbf{style} is defined as the \textbf{textural} information of an image, i.e. the \textbf{tone mapping}. But we train them simultaneously in this framework.
+
+The procedure for neural style transfer is to optimise the \textbf{blank image} we are generating (generated image) w.r.t. the \textbf{content loss} and \textbf{style loss} in CNN \figref{fig6}.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{image/fig6.png}
+    \caption{Overview of deep style algorithm in \cite{CVPR2016_Gatys_stcnn}}
+    \label{fig6}
+\end{figure}
+Content loss is defined as a mean square error (MSE) of feature maps between content image \(P^{l}\) and generated image \(F^{l}\). 
+\[
+\mathcal{L}_{\mbox{content}}(P^{l}, F^{l}) = \frac{1}{2} \|F^{l}- P^{l}\|^{2}_{2}
+\]
+where \(l=4\) in our experiments.
+
+On the other hand, style loss is defined as the difference between Gramian matrix of the feature map of generated image \(G^{l}={F^{l}}^{\top}F^{l}\) and style image \(A^{l}={S^{l}}^{\top}S^{l}\).
+Then the contribution of layer \(l\) to the style loss is
+\[
+E_{l} = \frac{1}{(2N^{l}M^{l})^{2}} \|F^{l}-G^{l}\|^{2}_{2}
+\]
+where \(N^{l}, M^{l}\) are the size of style and generated feature maps.
+And the style loss is
+\[
+\mathcal{L}_{\mbox{style}}(S^{l}, F^{l}) = \sum_{l=1}^{5} w_{l} E_{l}
+\]
+
+Finally, we initialize the generated matrix with white noise. And perform gradient descent on it to minimize features discrepancy with total loss \(\mathcal{L}_{\mbox{total}}\).
+\[
+\mathcal{L}_{\mbox{total}}(P, S, F) = \alpha \mathcal{L}_{\mbox{style}}(S, F) + (1 - \alpha) \mathcal{L}_{\mbox{content}}(P, F)
+\]
+where hyper-parameter \(\alpha\) controls the level of style.
+
+In our experiments, we find out there are \textbf{three} critical factors:
+\begin{enumerate}
+  \item Style loss. The difference between feature maps of the generated image and the style image.
+  \item Style image. We could get a different style of pencil sketching by the style image.
+  \item Initial generated matrix. Start from the different generated matrix, such as random, content, and style.
+\end{enumerate}
+The first factor is essential to the training procedure. Even if we carefully adjust and grid-search the hyper-parameters, such as \(\alpha, w_{l}\), some images are too difficult to train with limited time \figref{fig6-1}.
+\begin{figure}
+  \centering
+  \includegraphics[width=0.7\textwidth]{image/fig6-1.png}
+  \caption{Gram loss is difficult to train}
+  \label{fig6-1}
+\end{figure}
+
+Inspired by \cite{2020_Huang_sdf}, we could treat feature map of style as \textbf{probability distribution}. And use \textbf{Wassersten distance} as the metric of distribution distance between generated image and style image.
+\[
+E_{l} = \mathcal{W}(F^{l}, S^{l})=\inf_{\gamma \in \Gamma(F^{l}, S^{l})} \mathbb{E}_{x, y \sim \gamma} \left[\|x - y \|_{2} \right]
+\]
+where \(\mathcal{W}\) is Wassersten distance.
+Thus we can follow the idea from \textbf{WGAN} \cite{2017pmlr-arjovsky-wgan}. Build the \textbf{discriminators} to approximate the Wassersten distance.
+Finally, take style image as the real image, generated matrix as result of generator, iteratively train discriminator and generator to make their distribution closer.
+\begin{figure}
+  \centering
+  \includegraphics[width=0.7\textwidth]{image/fig7.png}
+  \caption{From Gramian matrix loss to Wassersten distance}
+  \label{fig7}
+\end{figure}
+The results show the improvement of replacing Gramian matrix loss with WGAN \figref{fig7-7}.
+\begin{figure}
+  \centering
+  \includegraphics[width=0.7\textwidth]{image/fig7-7.png}
+  \caption{WGAN could get better results in less epochs}
+  \label{fig7-7}
+\end{figure}
+
+The second factor is choosing the style image. As we know the core idea of style transfer is \alert{overlapping} the style image on the content image. There is a dramatic effect of different style images, moreover, it could \textbf{destroy} our generated matrix in case \figref{fig7-1}.
+\begin{figure}
+  \centering
+  \includegraphics[width=0.7\textwidth]{image/fig7-1.png}
+  \caption{Style is difficult to select}
+  \label{fig7-1}
+\end{figure}
+
+The third factor is the initialization of generated matrix. We could see the different results starting from random noise or content generated matrix \figref{fig7-2}. The significant feature is \textbf{histogram of intensity distribution}. Regardless of random noise or content generated matrix, it cannot easily reach the pencil sketching style.
+\begin{figure}
+  \centering
+  \includegraphics[width=0.7\textwidth]{image/fig7-2.png}
+  \caption{Difference initial generated matrix}
+  \label{fig7-2}
+\end{figure}
+
+To solve the above issues, we provide a new idea of combining the traditional algorithm and the deep style. We use the result of the traditional algorithm as a style image as well as the initial generated matrix. It could get \textbf{stable edge information} but \textbf{rich tone information} pencil sketching.
+And we reveal our improvement in experiments.
+
+\subsection{Im2pencil}
+\textbf{Im2pencil} is a SOTA pencil-style sketching deep learning method. It combines the traditional edge detection and deep learning method to create the different \textbf{outlines} (line drawing) and \textbf{shading} (tone mapping) pencil style image \figref{fig7-3}.
+\begin{figure}
+  \centering
+  \includegraphics[width=0.5\textwidth]{image/fig7-3.png}
+  \caption{Twe control factors in \textbf{Im2pencil}: outlines and shading}
+  \label{fig7-3}
+\end{figure}
+
+The core idea of \textbf{Im2pencil} is design one CNN to capture predefined clear and rough outlines, the other CNN to render predefined hatching, blending, cross-hatching, and stippling shading.
+The goal of outline CNN and shading CNN is transforming edge map and tone map into pencil style sketching \figref{fig7-4}.
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{image/fig7-4.png}
+  \caption{Overview of \textbf{Im2pencil} algorithm in \cite{2012_Lu_combine}}
+  \label{fig7-4}
+\end{figure}
+At first, they collect many pencil drawings on the web. Then manually annotate these images with outline style labels as well as shading style labels as the training dataset \figref{fig7-5}.
+\begin{figure}
+  \centering
+  \includegraphics[width=0.7\textwidth]{image/fig7-5.png}
+  \caption{Annotations of pre-define styles are required}
+  \label{fig7-5}
+\end{figure}
+
+Next step, they use the Extended Difference-of Gaussians (XDoG) filter to obtain outline drawing. And Guided Filter
+(GF) to acquire a tone map \figref{fig7-6}.
+\begin{figure}
+  \centering
+  \includegraphics[width=0.4\textwidth]{image/fig7-6.png}
+  \caption{Intermediates of XDoG (edge) \& GF (tone)}
+  \label{fig7-6}
+\end{figure}
+Then train in outline branch and shading branch.
+
+In this project, we use their pre-trained model to predict/ reference our dataset. We could extract the outline drawing and tone map, select desired styles to conduct style transfer procedures.

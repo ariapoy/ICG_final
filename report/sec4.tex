@@ -1,0 +1,79 @@
+\section{Experimental results}
+First, we will discuss the results of the traditional algorithm. Second, conduct several experiments with deep style and show how we improve it with the train WGAN framework. Third, results of combining traditional algorithm and deep style. Finally, we compare the above methods with \textbf{Im2Pencil}, which is an emerging method in recent.
+
+\subsection{Traditional algorithm}
+The traditional algorithm gives a stable and good performance on different scenarios, including the night scene \figref{fig8}. We could adjust the \textbf{thickness} of line drawing as well as \textbf{intensity \& texture} of tone mapping to get desired results.
+\begin{figure}
+  \centering
+  \includegraphics[width=0.7\textwidth]{image/fig8.png}
+  \caption{Results of traditional algorithm on beginner sketching \& scene sketching}
+  \label{fig8}
+\end{figure}
+
+Although the traditional algorithm seems robust, it causes the problem when we apply it to video the scenario. We could discover that there is \textbf{lens}/mask-like side effects in front of our eyes. i.e. only the edge changes with time but not for background texture. It is caused by \(R = T \ast S\), the tone mapping comes from the same pencil style image. When the scenes are similar but our sight moves, the traditional algorithm gives artificial results \figref{fig8-1}.
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{image/fig8-1.png}
+  \caption{Results of traditional algorithm on video sketching}
+  \label{fig8-1}
+\end{figure}
+
+\subsection{Deep style}
+The deep style with WGAN gives the rich style of pencil sketching. We could replace the \textbf{style images} to get different results.
+There are some tips to choose style images:
+\begin{itemize}
+  \item Select with similar outlines of the content image.
+  \item Select with similar tones of the content image.
+  \item Select with simple and consistent outlines and tones. e.g. \textbf{Van Gogh}'s drawing is great in our experiments.
+\end{itemize}
+In \figref{fig9}, we get good on the beginner sketching scenario as these images have clear contours. But in scene sketching, it is difficult of selecting similar style images. And it often blurs on light objects in a night scenes with relatively strong contrast dark background.
+\begin{figure}
+  \centering
+  \includegraphics[width=0.7\textwidth]{image/fig9.png}
+  \caption{Results of deep style on beginner sketching \& scene sketching}
+  \label{fig9}
+\end{figure}
+
+\subsection{Combine traditional algorithm and deep style}
+Reuse the results of the traditional algorithm is better than before. We could get more flexible context, tone than the traditional algorithm, but also stable than pure deep style.
+
+Moreover, we show that the take it as initial generated matrix, the results is more similar to human-like pencil sketching \figref{fig10}. We consider that the distribution of intensity is closer to the tone map in the traditional algorithm.
+\begin{figure}
+  \centering
+  \includegraphics[width=0.7\textwidth]{image/fig10.png}
+  \caption{Histogram is closer to style image is better}
+  \label{fig10}
+\end{figure}
+
+We list traditional algorithm, deep style with WGAN and their combination from the top row to down row.
+\begin{figure}
+  \centering
+  \includegraphics[width=0.7\textwidth]{image/fig10-1.png}
+  \caption{Compare traditional algorithm, deep style \& combining on beginner sketching}
+  \label{fig10-1}
+\end{figure}
+In a beginner sketching scenario \figref{fig10-1}, we could sketch \textit{Five (and More) Senses} of human faces.
+The deep style with WGAN gives the special style of pencil sketching.
+And our method remedies the \textbf{loss edge} information in the traditional algorithm, e.g. \textit{Face of Poy} \& \textit{Eyes of 新垣結衣}. Besides, it gives more variation on texture and intensity to strong the pencil style.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.7\textwidth]{image/fig10-2.png}
+  \caption{Compare traditional algorithm, deep style \& combining on scene sketching}
+  \label{fig10-2}
+\end{figure}
+In scene sketching scenario \figref{10-2}, the traditional algorithm gives stable style effects.
+But deep style with GAN remains afterimage of style image, and it still does not work well on the night scene. Overall, we find out the best results in deep style occur when using Van Gogh's drawing as style images. We consider that his drawings have more intense painting without any strange texture. It makes style transfer relatively stable and natural than other style images.
+At last, our method learns better pencil style and makes the clear contour of the focal point (buildings) and its neighbors.
+
+
+On video sketching, our method ensures variation and randomness during the deep style training process. It eliminates the artificial effect of a traditional algorithm. But it also causes the \textbf{twinkling} effects on continuous images. We try to add noise during our training process but fail at this time.
+
+\subsection{Im2pencil}
+Im2pencil can easily generate desired outline or shading.
+
+On beginner sketching scenario, we could obtain eight different styles. The columns are different outline style. The rough outline learn the shaking as the human drawing; clear outline gives relative straight outlines. The rows are different shading style. The different shading style gives the different contrast and brightness of results.
+
+On scene sketching scenario, the Im2pencil sketches more clear on shadow of the building than before. We consider that the separate outline and shading CNNs achieves this effects.
+
+On video sketching scenario, the Im2pencil gives more robust and well results.
