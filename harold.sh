@@ -49,4 +49,4 @@ python ICG_Rendering.py --lineart_path harold-s1-S.jpg --mask_path harold-s1-S.j
 # option 4
 # follow option 3
 # style transfer it again
-python main.py --distance gram --samples 1024 --steps 500 --alpha 0.1 --init-img content --style harold-s1-9.png --content harold-s1.png --out-dir harold --out_name harold-p4
+python main.py --distance wgan-gp --samples 1024 --steps 500 --alpha 0.1 --init-img content --style harold-s1.png --content harold-s1-9.png --out-dir harold --out_name harold-p4
