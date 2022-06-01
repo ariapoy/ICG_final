@@ -75,7 +75,7 @@ def get_starting_imgs(args):
     while (M*N > max_wxh):
         M = int(M/k)
         N = int(N/k)
-        k += 1
+        k += 0.1
 
     content_img = content_img.resize((M, N))
     style_img = style_img.resize((M, N))
@@ -98,10 +98,10 @@ def get_starting_imgs(args):
         gen_img = style_img.clone()
     else:
         gen_img = Image.open(args.init_img)
-        gen_img = gen_img.resize(style_img.size())
-        gen_img = F.to_tensor(gen_img).unsqueeze(0).to(args.device)
+        gen_img = gen_img.resize((M, N))
+        # gen_img = F.to_tensor(gen_img).unsqueeze(0).to(args.device)
+        gen_img = image_transform(gen_img, args.device, args.gray)
 
-    #print(gen_img.size())
     return style_img, content_img, gen_img, (orig_M, orig_N)
 
 
