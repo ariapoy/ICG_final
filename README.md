@@ -6,36 +6,48 @@ This repo is for the final project of team 1, in NTU ICG 2022 spring.
 
 Please check the version of CUDA, if you are using CUDA 10 please check [here](https://pytorch.org/get-started/locally/)
 
+### Prerequirement
+
+```shell
+cd DeepNormal; git clone https://github.com/V-Sense/DeepNormals.git
+cp *.py DeepNormals/
 ```
+
+**Warning!**
+
+- If you use `tensorflow>=1.5`, you need to change *model.py*.
+
+```git
+-       Network = tf.nn.l2_normalize(Network, dim = 3)
++       Network = tf.nn.l2_normalize(Network, axis = 3)
+```
+
+### Method 1 Python Venv/Virtualenv
+
+```shell
 make clean all
 source ./venv/bin/activate
 ```
-
-For **Im2Pencil** enviornment setting, please see `im2pencil/README.md`.
-
-## Quick Start
+### Method 2 Anaconda
 
 ```shell
-# 1 comb sketch & tone
-cd traditional/
-python pencilTrans.py --input_path teapot3.png -sw 1 -sd 3
-# 2 style transfer
-cd deepstyle/
-python main.py --style img-style/s1.jpg --content teapot3.png --out-dir teapot3 --out_name teapot3-s1 --alpha 0.1
-# 3 DeepNormal
-cd DeepNormal/DeepNormals/
-python main.py --lineart_path teapot3-S.jpg --mask_path teapot3-S.jpg --save_name teapot3-S
-# 4 DeepNormal
-python ICG_Rendering.py --lineart_path teapot3-S.jpg --mask_path teapot3-S.jpg --normal_path teapot3- --color_path harold.jpg
+conda env create -f environment.yml
+conda activate ICG
 ```
 
 ## Quick Start
 
 Please see
 
-- `traditional/README.md` for traditional algorithm.
-- `deepstyle/README.md` for deep style transfer.
-- `im2pencil/README.md` for **Im2Pencil**.
+- `harold.sh`
+
+## Documents
+
+Please see
+
+- `traditional/README.md` for **combine sketch & tone**.
+- `deepstyle/README.md` for **neural style transfer**.
+- `DeepNormal/README.md` for **DeepNormal**.
 
 If there is any problem, please feel free to send an email to ``d09944015@ntu.edu.tw''
 
@@ -44,9 +56,9 @@ If there is any problem, please feel free to send an email to ``d09944015@ntu.ed
 - Sheng-Wei Chen
 - Yaxu Liu
 - Poy Lu
-- Cheng-Kun Yang
 
 ## Reference
 
-1. https://github.com/milesial/Pytorch-UNet
-
+1. [Neural Transfer Using PyTorch](https://github.com/ariapoy/ICG_final.git)
+2. [Combining sketch and tone for pencil drawing production](https://github.com/candycat1992/PencilDrawing)
+3. [Deep Normals](https://github.com/V-Sense/DeepNormals)
