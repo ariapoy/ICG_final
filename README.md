@@ -11,6 +11,7 @@ Please check the version of CUDA, if you are using CUDA 10 please check [here](h
 ```shell
 cd DeepNormal; git clone https://github.com/V-Sense/DeepNormals.git
 cp *.py DeepNormals/
+cd DeepNormals/; wget https://v-sense.scss.tcd.ie/Datasets/DeepNormalsModel.zip; unzip DeepNormalsModel.zip -d Net/
 ```
 
 **Warning!**

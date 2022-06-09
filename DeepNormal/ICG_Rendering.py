@@ -82,9 +82,11 @@ parser.add_argument('--lineart_path', dest='lineart_path', default='Pepper/Lines
 parser.add_argument('--mask_path', dest='mask_path', default='Pepper/Mask.jpg', help='Path of the mask')
 parser.add_argument('--normal_path', dest='normal_path', default='RES/Normal_Map.png', help='Path of the normal map')
 parser.add_argument('--color_path', dest='color_path', default='Pepper/Colors.jpg', help='Path of the flat colors')
-parser.add_argument('--r', dest='r', type= float, default=0.99, help='r value for light')
+# parser.add_argument('--r', dest='r', type= float, default=0.99, help='r value for light')
+parser.add_argument('--r', dest='r', type= float, default=0.83, help='r value for light')
 parser.add_argument('--g', dest='g', type= float, default=0.83, help='r value for light')
-parser.add_argument('--b', dest='b', type= float, default=0.66, help='r value for light')
+# parser.add_argument('--b', dest='b', type= float, default=0.66, help='r value for light')
+parser.add_argument('--b', dest='b', type= float, default=0.83, help='r value for light')
 parser.add_argument('--save_path', dest ='save_path', default='test/', help='Path of the save folder')
 args = parser.parse_args()
 
@@ -197,37 +199,32 @@ while t <= 9:
 	pos_diff = 100 * 8
 	if t == 1:
 		Xpos += pos_diff
-		r = 0.01
-		g = 0.83
-		b = 0.66
 	elif t == 2:
 		Xpos -= pos_diff
-		r = 0.99
 		Ypos -= pos_diff
 	elif t == 3:
 		Ypos += pos_diff
 		Zpos += pos_diff
 	elif t == 4:
-		Zpos -= pos_diff
-		filtering += 1
+		r, g, b = 0.99, 0.83, 0.66
 	elif t == 5:
-		filtering -= 1
-		amb += 0.05
+		r, g, b = 0.83, 0.83, 0.83
+		amb = 1
 	elif t == 6:
-		amb -= 0.05
-		ks -= 50
+		amb = 0.55
+		ks = 50
 	elif t == 7:
-		ks += 50
-		alpha += 2
+		ks = 0
+		alpha = 50
 	elif t == 8:
-		alpha -= 2
+		alpha = 10
 		Xpos += pos_diff
-		Xpos += pos_diff
+		Ypos += pos_diff
 		Zpos += pos_diff
 	elif t == 9:
 		Xpos -= pos_diff
-		Xpos -= pos_diff
+		Ypos -= pos_diff
 		Zpos -= pos_diff
-		r = 0.70
-		g = 0.70
-		b = 0.70
+		r = 1.00
+		g = 1.00
+		b = 1.00
